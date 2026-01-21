@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Private Space</title>
+
+<style>
+  :root{
+    --bg:#0f172a;--text:#e5e7eb;--card:#020617;--accent:#38bdf8;
+  }
+  body.light{
+    --bg:#f8fafc;--text:#020617;--card:#e5e7eb;--accent:#0ea5e9;
+  }
+  body{
+    margin:0;font-family:Segoe UI,sans-serif;
+    background:var(--bg);color:var(--text);transition:.3s;
+  }
+  nav{
+    background:var(--card);padding:10px;
+    display:flex;justify-content:center;gap:10px;
+  }
+  nav button, .top button{
+    background:var(--accent);border:none;
+    padding:8px 14px;border-radius:20px;
+    font-weight:bold;cursor:pointer;
+  }
+  section{display:none;max-width:800px;margin:auto;padding:20px;}
+  section.active{display:block}
+  textarea{
+    width:100%;height:220px;background:var(--card);
+    color:var(--text);border:none;border-radius:12px;
+    padding:15px;resize:vertical;
+  }
+  img{max-width:200px;border-radius:14px;margin:10px}
+  h1,h2{color:var(--accent)}
+  .lock{
+    position:fixed;inset:0;background:var(--bg);
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+  }
+  .lock input{padding:10px;border-radius:10px;border:none}
+  .top{position:fixed;top:10px;right:10px;display:flex;gap:5px}
+</style>
+</head>
+
+<body>
+
+<!-- 🔒 LOCK -->
+<div class="lock" id="lock">
+  <h1>🔒 Private Space</h1>
+  <input type="password" id="passwordInput" placeholder="Password">
+  <br>
+  <button onclick="unlock()">Enter</button>
+</div>
+
+<!-- 🔘 TOP BUTTONS -->
+<div class="top">
+  <button onclick="toggleTheme()">🌙☀</button>
+  <button onclick="toggleMusic()">🎵</button>
+</div>
+
+<!-- 🎧 MUSIC -->
+<audio id="bgMusic" loop>
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<nav>
+  <button onclick="openSection('home')">Home</button>
+  <button onclick="openSection('life')">Life</button>
+  <button onclick="openSection('school')">School</button>
+  <button onclick="openSection('photos')">Photos</button>
+  <button onclick="openSection('story')">Story</button>
+</nav>
+
+<section id="home" class="active">
+  <h1>Welcome</h1>
+  <p>My calm private place.</p>
+</section>
+
+<section id="life">
+  <h2>Life Notes</h2>
+  <textarea id="lifeText"></textarea>
+</section>
+
+<section id="school">
+  <h2>School Notes</h2>
+  <textarea id="schoolText"></textarea>
+</section>
+
+<section id="photos">
+  <h2>Photos</h2>
+  <input type="file" accept="image/*" onchange="addPhoto(event)">
+  <div id="photoGallery"></div>
+</section>
+
+<section id="story">
+  <h2>My Story</h2>
+  <textarea id="storyText"></textarea>
+</section>
+
+<!-- ✅ ONE SCRIPT. DONE. -->
+<script>
+const PASSWORD="myspace123";
+const music=document.getElementById("bgMusic");
+const lock=document.getElementById("lock");
+const VOLUME=.35;
+
+function unlock(){
+  if(passwordInput.value===PASSWORD){
+    lock.style.display="none";
+    music.volume=VOLUME;
+    music.play().catch(()=>{});
+    localStorage.music="1";
+  }else alert("Wrong password");
+}
+
+function toggleMusic(){
+  if(music.paused){music.volume=VOLUME;music.play();localStorage.music="1";}
+  else{music.pause();localStorage.music="0";}
+}
+
+function toggleTheme(){
+  document.body.classList.toggle("light");
+  localStorage.theme=document.body.className;
+}
+
+if(localStorage.theme) document.body.className=localStorage.theme;
+
+function openSection(id){
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+["lifeText","schoolText","storyText"].forEach(id=>{
+  const el=document.getElementById(id);
+  el.value=localStorage[id]||"";
+  el.oninput=()=>localStorage[id]=el.value;
+});
+
+function addPhoto(e){
+  const r=new FileReader();
+  r.onload=()=>{
+    const img=document.createElement("img");
+    img.src=r.result;
+    photoGallery.appendChild(img);
+  };
+  r.readAsDataURL(e.target.files[0]);
+}
+</script>
+
+</body>
+</html>
